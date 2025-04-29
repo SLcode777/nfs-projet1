@@ -20,9 +20,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <div className="container">
-      <div className="text-2xl font-bold mb-2">
-        {post?.title} & {post?.id}
-      </div>
+      <div className="text-2xl font-bold mb-2">{post?.title}</div>
       <hr className="mb-10 border-0 h-0.5 rounded bg-gradient-to-r from-purple-700 to-blue-500" />
       <div className="flex flex-row gap-2 justify-end mb-2 text-sm px-2 text-gray-500">
         <div>Publié le : </div>

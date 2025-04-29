@@ -41,6 +41,7 @@ export const NewCommentForm = ({ postId }: { postId: number }) => {
     if (res.ok) {
       console.log("commentaire envoyé !", res.body);
       router.refresh();
+      setFormData({ email: "", name: "", content: "", postId: postId });
     } else {
       console.error("Erreur lors de l'envoi du commentaire");
     }
