@@ -4,7 +4,7 @@ import { getAllPosts } from "../../lib/queries";
 
 const posts = await getAllPosts();
 
-console.log("posts : ", posts);
+console.log("liste des posts : ", posts);
 
 export default function BlogPage() {
   return (

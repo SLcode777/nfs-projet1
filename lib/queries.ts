@@ -1,5 +1,5 @@
+import { hashPassword } from "./hash";
 import prisma from "./prisma";
-
 
 //RECUPERER TOUS LES POSTS CLASSES PAR DATE DECROISSANTE
 
@@ -48,8 +48,7 @@ export async function getCommentByPostSlug(slug: string) {
   return comments;
 }
 
-
-//AJOUTER UN NOUVEAU COMMENTAIRE 
+//AJOUTER UN NOUVEAU COMMENTAIRE
 
 export type NewCommentType = {
   email: string;
@@ -69,4 +68,47 @@ export async function addNewComment(comment: NewCommentType) {
   });
 
   console.log("new comment created : ", newPost);
+}
+
+//CHERCHER UN UTILISATEUR PAR SON EMAIL
+
+export async function searchUserByMail(mailToFind: string) {
+  const searchUser = await prisma.user.findUnique({
+    where: {
+      email: mailToFind,
+    },
+    select: {
+      email: true,
+      password: true,
+    },
+  });
+
+  if (!searchUser) {
+    console.log("this user does not exist");
+    return;
+  }
+
+  return { searchUser };
+}
+
+//AJOUTER UN NOUVEL UTILISATEUR
+
+export type NewUserType = {
+  sessionId: number;
+  email: string;
+  password: string;
+};
+
+export async function addNewUser(user: NewUserType) {
+  const hashedPassword = await hashPassword(user.password);
+
+  const newUser = await prisma.user.create({
+    data: {
+      sessionId: 0,
+      email: user.email,
+      password: hashedPassword,
+    },
+  });
+
+  console.log("new user dans prisma query : ", newUser);
 }

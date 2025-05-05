@@ -35,3 +35,25 @@ model Comment {
   postId    Int
   post      Post @relation(fields: [postId], references: [id])
 }
+
+model User {
+  id        Int @id @default(autoincrement())
+  email     String @unique
+  password  String 
+  name      String?
+
+  sessionId Int?
+  sessions  Session[]
+     
+}
+
+model Session {
+  id        Int @id @default(autoincrement())
+  token     String  
+  
+  createdAt DateTime
+  expiresAt DateTime
+
+  userId    Int
+  user      User @relation(fields: [userId], references: [id])
+}
