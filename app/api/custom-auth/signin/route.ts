@@ -2,6 +2,9 @@ import { verifyPassword } from "@/lib/hash";
 import { searchUserByMail } from "@/lib/queries";
 import console from "console";
 import { NextRequest, NextResponse } from "next/server";
+import { createSession } from "@/lib/queries";
+import { createCookieSession } from "@/lib/cookies";
+import { nanoid } from "nanoid";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +38,12 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    const token = nanoid();
+
+    await createSession(existingUser.searchUser.id, token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+
+    await createCookieSession(token);
 
     return NextResponse.json({
       message: "connexion reussie",

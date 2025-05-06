@@ -42,17 +42,16 @@ model User {
   password  String 
   name      String?
 
-  sessionId Int?
   sessions  Session[]
      
 }
 
 model Session {
   id        Int @id @default(autoincrement())
-  token     String  
+  token     String  @unique
   
-  createdAt DateTime
-  expiresAt DateTime
+  createdAt DateTime @default(now())
+  expiresAt DateTime 
 
   userId    Int
   user      User @relation(fields: [userId], references: [id])

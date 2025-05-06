@@ -76,7 +76,7 @@ export default function SigninPage() {
             <Button type="submit">Se connecter</Button>
             <Link
               className="text-sm text-muted-foreground hover:underline"
-              href={"/auth/signin"}
+              href={"/auth/signup"}
             >
               Je n'ai pas encore de compte
             </Link>

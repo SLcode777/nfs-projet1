@@ -1,12 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { getAllPosts } from "../../lib/queries";
+import { getCurrentUser } from "../../lib/getCurrentUser";
+import { redirect } from "next/navigation";
 
 const posts = await getAllPosts();
 
 console.log("liste des posts : ", posts);
 
-export default function BlogPage() {
+export default async function BlogPage() {
+
+  const user = await getCurrentUser();
+
+  if(!user) {
+    throw redirect("/auth/signin")
+  }
   return (
     <div className="container">
       <div className="text-2xl font-bold mb-2">Welcome to my blog ! :)</div>

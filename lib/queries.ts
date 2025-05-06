@@ -1,5 +1,7 @@
+import { nanoid } from "nanoid";
 import { hashPassword } from "./hash";
 import prisma from "./prisma";
+import { createCookieSession } from "./cookies";
 
 //RECUPERER TOUS LES POSTS CLASSES PAR DATE DECROISSANTE
 
@@ -80,6 +82,8 @@ export async function searchUserByMail(mailToFind: string) {
     select: {
       email: true,
       password: true,
+      id: true, 
+      sessions: true
     },
   });
 
@@ -91,24 +95,81 @@ export async function searchUserByMail(mailToFind: string) {
   return { searchUser };
 }
 
+// CREATE SESSION
+
+export type SessionType = {
+  userId: number;
+  token: string;
+  expiresAt: Date;
+  createdAt: Date;
+};
+
+export async function createSession(userId: number, token: string, expiresAt: Date) {
+  const newSession = await prisma.session.create({
+
+    data: {
+      userId: userId,
+      token: token,
+      expiresAt: expiresAt,
+      createdAt: new Date(),
+    },
+  });
+
+  console.log("new session created : ", newSession);
+  return newSession;
+}
+
 //AJOUTER UN NOUVEL UTILISATEUR
 
 export type NewUserType = {
-  sessionId: number;
   email: string;
   password: string;
 };
 
 export async function addNewUser(user: NewUserType) {
-  const hashedPassword = await hashPassword(user.password);
 
+  const hashedPassword = await hashPassword(user.password);
+  const token = nanoid()
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+  
   const newUser = await prisma.user.create({
     data: {
-      sessionId: 0,
       email: user.email,
       password: hashedPassword,
+      sessions: {
+        create: {
+          token: token,
+          expiresAt: expiresAt,
+          createdAt: new Date(),
+        },
+      },
     },
   });
-
+  
   console.log("new user dans prisma query : ", newUser);
+
+  return newUser;
+
+}
+
+//RECUPERER LA SESSION D'UN UTILISATEUR
+
+export async function getSessionByUserId(userId: number) {
+
+  const session = await prisma.session.findFirst({
+    where: {
+      userId: userId,
+      expiresAt: {
+        gte: new Date(),
+      }
+    },
+    select: {
+      token: true,
+    }
+
+    
+  })
+
+  return session;
 }
