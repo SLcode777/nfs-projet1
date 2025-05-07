@@ -1,13 +1,16 @@
-import { verifyPassword } from "@/lib/hash";
-import { addNewUser, searchUserByMail } from "@/lib/queries";
-import console from "console";
-import { NextRequest, NextResponse } from "next/server";
-import { createSession, getSessionByUserId } from "@/lib/queries";
 import { createCookieSession } from "@/lib/cookies";
+import { verifyPassword } from "@/lib/hash";
+import {
+  addNewUser,
+  createSession,
+  getSessionByUserId,
+  searchUserByMail,
+} from "@/lib/queries";
+import console from "console";
 import { nanoid } from "nanoid";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-
   try {
     const body = await request.json();
 
@@ -22,8 +25,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    
-
     const newUser = {
       id: 0,
       sessionId: "",
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const existingUser = await searchUserByMail(newUser.email);
 
-    console.log("existing User : ", existingUser);
+    console.log("existing User in signup route : ", existingUser);
 
     if (existingUser) {
       const existingUserPassword = existingUser?.searchUser.password;
@@ -51,19 +52,21 @@ export async function POST(request: NextRequest) {
 
       //IF PASSWORD IS VALID CREATE SESSION AND COOKIE
       if (isValidPassword) {
-
         const token = nanoid();
 
-        await createSession(existingUser.searchUser.id, token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+        await createSession(
+          existingUser.searchUser.id,
+          token,
+          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        );
 
         await createCookieSession(token);
-        
+
         return NextResponse.json(
           { message: "connexion réussie !", user: existingUser },
           { status: 200 }
         );
       } else {
-
         //IF USER EXISTS BUT PASSWORD IS NOT VALID REDIRECT TO SIGNIN AND ASK FOR PASSWORD AGAIN
         return NextResponse.json(
           {
@@ -74,43 +77,37 @@ export async function POST(request: NextRequest) {
         );
       }
     } else {
-
       //IF USER DOES NOT EXIST CREATE NEW USER
 
       await addNewUser(newUser);
 
-      
       console.log("utilisateur créé dans la Database !", newUser);
 
       //GET NEWLY CREATED USER ID
-      
+
       const newlyCreatedUser = await searchUserByMail(newUser.email);
 
       const newlyCreatedUserId = newlyCreatedUser?.searchUser.id;
 
       if (newlyCreatedUserId) {
-
         //CREATE SESSION AND COOKIE
-        
+
         const session = await getSessionByUserId(newlyCreatedUserId);
-  
+
         console.log("session recupérée dans route signup : ", session);
 
         if (session) {
-  
-          const token = session?.token
-  
-          console.log("token dans route signup: ", token);
-    
-          const cookie = await createCookieSession(token);   
-          
-          console.log("cookie dans route signup: ", cookie);
-          
-          return NextResponse.json(cookie, { status: 201 });
-  
-        }
-      }  
+          const token = session?.token;
 
+          console.log("token dans route signup: ", token);
+
+          const cookie = await createCookieSession(token);
+
+          console.log("cookie dans route signup: ", cookie);
+
+          return NextResponse.json(cookie, { status: 201 });
+        }
+      }
 
       return NextResponse.json(newUser, { status: 201 });
     }

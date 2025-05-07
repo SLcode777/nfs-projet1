@@ -1,7 +1,7 @@
+import { randomUUID } from "crypto";
 import { nanoid } from "nanoid";
 import { hashPassword } from "./hash";
 import prisma from "./prisma";
-import { createCookieSession } from "./cookies";
 
 //RECUPERER TOUS LES POSTS CLASSES PAR DATE DECROISSANTE
 
@@ -81,9 +81,9 @@ export async function searchUserByMail(mailToFind: string) {
     },
     select: {
       email: true,
-      password: true,
-      id: true, 
-      sessions: true
+      custompass: true,
+      id: true,
+      sessions: true,
     },
   });
 
@@ -98,20 +98,24 @@ export async function searchUserByMail(mailToFind: string) {
 // CREATE SESSION
 
 export type SessionType = {
-  userId: number;
+  userId: string;
   token: string;
   expiresAt: Date;
   createdAt: Date;
 };
 
-export async function createSession(userId: number, token: string, expiresAt: Date) {
+export async function createSession(
+  userId: string,
+  token: string,
+  expiresAt: Date
+) {
   const newSession = await prisma.session.create({
-
     data: {
+      id: randomUUID(),
       userId: userId,
       token: token,
       expiresAt: expiresAt,
-      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
@@ -127,49 +131,51 @@ export type NewUserType = {
 };
 
 export async function addNewUser(user: NewUserType) {
+  const token = nanoid();
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  const hashedPassword = await hashPassword(user.password);
-  const token = nanoid()
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-  
   const newUser = await prisma.user.create({
     data: {
+      id: randomUUID(),
       email: user.email,
-      password: hashedPassword,
+      custompass: user.password,
+      name: "anonyme",
+      emailVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       sessions: {
         create: {
           token: token,
           expiresAt: expiresAt,
           createdAt: new Date(),
+          id: randomUUID(),
+          updatedAt: new Date(),
+          ipAddress: null,
+          userAgent: null,
         },
       },
     },
   });
-  
+
   console.log("new user dans prisma query : ", newUser);
 
   return newUser;
-
 }
 
 //RECUPERER LA SESSION D'UN UTILISATEUR
 
-export async function getSessionByUserId(userId: number) {
-
+export async function getSessionByUserId(userId: string) {
   const session = await prisma.session.findFirst({
     where: {
       userId: userId,
       expiresAt: {
         gte: new Date(),
-      }
+      },
     },
     select: {
       token: true,
-    }
-
-    
-  })
+    },
+  });
 
   return session;
 }
