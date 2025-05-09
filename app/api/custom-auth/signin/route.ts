@@ -1,10 +1,9 @@
-import { verifyPassword } from "@/lib/hash";
-import { searchUserByMail } from "@/lib/queries";
-import console from "console";
-import { NextRequest, NextResponse } from "next/server";
-import { createSession } from "@/lib/queries";
 import { createCookieSession } from "@/lib/cookies";
+import { verifyPassword } from "@/lib/hash";
+import { createSession, searchUserByMail } from "@/lib/queries";
+import console from "console";
 import { nanoid } from "nanoid";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,21 +26,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const passwordMatch = await verifyPassword(
-      userPw,
-      existingUser.searchUser.password
-    );
+    const passwordInDatabase = existingUser.searchUser.custompass;
 
-    if (!passwordMatch) {
-      return NextResponse.json(
-        { error: "Incorrect password" },
-        { status: 401 }
+    if (passwordInDatabase) {
+      const passwordMatch = await verifyPassword(userPw, passwordInDatabase);
+
+      console.log(
+        "typed pw : ",
+        userPw,
+        "registered pw : ",
+        passwordInDatabase
       );
+
+      if (!passwordMatch) {
+        return NextResponse.json(
+          { error: "Incorrect password" },
+          { status: 401 }
+        );
+      }
     }
 
     const token = nanoid();
 
-    await createSession(existingUser.searchUser.id, token, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+    await createSession(
+      existingUser.searchUser.id,
+      token,
+      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    );
 
     await createCookieSession(token);
 

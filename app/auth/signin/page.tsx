@@ -1,7 +1,5 @@
 "use client";
 
-//IL RESTE A METTRE EN PLACE LA CREATION DE SESSION ET LES COOKIES
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,8 +20,19 @@ export default function SigninPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  // const { data: session } = await authClient.getSession();
+  // const betterUser = session?.user.email;
+
+  // console.log(customUser);
+
+  // if (customUser || betterUser) {
+  //   throw redirect("/posts");
+  // }
+
   useEffect(() => {
-    if (emailFromParams) setUserMail(emailFromParams);
+    if (emailFromParams) {
+      setUserMail(emailFromParams);
+    } else return;
   }, [emailFromParams]);
 
   const handleCustomAuthSubmit = async (e: React.FormEvent) => {
@@ -78,17 +87,8 @@ export default function SigninPage() {
       {
         onRequest: (ctx) => {
           setIsLoading(true);
-          console.log("onRequest context : ", ctx);
-          console.log(
-            "user mail in onRequest : : ",
-            userMail,
-            "user pw in onRequest : : ",
-            userPw
-          );
         },
         onSuccess: (ctx) => {
-          setIsLoading(false);
-          console.log("onSuccess ctx : ", ctx);
           router.push("/posts");
         },
         onError: (ctx) => {

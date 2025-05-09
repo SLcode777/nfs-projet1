@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { nanoid } from "nanoid";
-import { hashPassword } from "./hash";
+import { cookies } from "next/headers";
 import prisma from "./prisma";
 
 //RECUPERER TOUS LES POSTS CLASSES PAR DATE DECROISSANTE
@@ -173,6 +173,25 @@ export async function getSessionByUserId(userId: string) {
       },
     },
     select: {
+      token: true,
+    },
+  });
+
+  return session;
+}
+
+export async function getSessionByToken() {
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("token")?.value;
+  const session = await prisma.session.findFirst({
+    where: {
+      token: token,
+      expiresAt: {
+        gte: new Date(),
+      },
+    },
+    select: {
+      user: true,
       token: true,
     },
   });

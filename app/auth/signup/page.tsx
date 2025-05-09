@@ -7,6 +7,7 @@ import { authClient } from "@/lib/better-auth/auth-client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast, Toaster } from "sonner";
 
 export default function SignupPage() {
   const params = useSearchParams();
@@ -100,7 +101,7 @@ export default function SignupPage() {
         onError: (ctx) => {
           setIsLoading(false);
           setIsError(true);
-          alert(ctx.error.message);
+          toast.error(ctx.error.message);
         },
       }
     );
@@ -175,6 +176,7 @@ export default function SignupPage() {
             </form>
           </CardContent>
         </Card>
+        <Toaster />
       </div>
     </div>
   );
