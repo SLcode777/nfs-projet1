@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     console.log("existing User in signup route : ", existingUser);
 
     if (existingUser) {
-      const existingUserPassword = existingUser?.searchUser.password;
+      const existingUserPassword = existingUser.searchUser.custompass;
 
       //IF USER EXISTS CHECK PASSWORD
 

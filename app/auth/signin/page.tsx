@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/better-auth/auth-client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { FormEventHandler, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function SigninPage() {
   const params = useSearchParams();
@@ -99,6 +100,35 @@ export default function SigninPage() {
       }
     );
   }
+
+  const handleMagicLinkSignIn: FormEventHandler<HTMLFormElement> = async (
+    e
+  ) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+
+    authClient.signIn.magicLink(
+      {
+        email,
+        callbackURL: "/posts",
+      },
+      {
+        onRequest: () => {
+          setIsLoading(true);
+        },
+        onSuccess: () => {
+          router.push("/verify");
+        },
+        onerror: (ctx: { error: { message: string } }) => {
+          toast.error(ctx.error.message);
+          setIsLoading(false);
+        },
+      }
+    );
+  };
+
   return (
     <div className="container">
       <div className="text-2xl font-bold mb-2">SE CONNECTER</div>
@@ -157,12 +187,32 @@ export default function SigninPage() {
                 onChange={(e) => setUserPw(e.target.value)}
               />
               <Button type="submit">Se connecter</Button>
+
               <Link
                 className="text-sm text-muted-foreground hover:underline"
                 href={"/auth/signup"}
               >
                 Je n'ai pas encore de compte
               </Link>
+            </form>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Better-Auth with Magic Link</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form
+              className="flex flex-col gap-2"
+              onSubmit={handleMagicLinkSignIn}
+            >
+              <Input
+                type="firstname"
+                name="firstname"
+                placeholder="votre prénom"
+              />
+              <Input type="email" name="email" placeholder="votre email" />
+              <Button>Se connecter avec Magic Link</Button>
             </form>
           </CardContent>
         </Card>
