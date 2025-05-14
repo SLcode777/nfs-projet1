@@ -129,6 +129,18 @@ export default function SigninPage() {
     );
   };
 
+  const handleGithubSignin = async () => {
+    await authClient.signIn.social({
+      provider: "github",
+    });
+  };
+
+  const handleGoogleSignin = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+    });
+  };
+
   return (
     <div className="container">
       <div className="text-2xl font-bold mb-2">SE CONNECTER</div>
@@ -214,6 +226,19 @@ export default function SigninPage() {
               <Input type="email" name="email" placeholder="votre email" />
               <Button>Se connecter avec Magic Link</Button>
             </form>
+          </CardContent>
+        </Card>{" "}
+        <Card>
+          <CardHeader>
+            <CardTitle>Better-Auth oAuth</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <Button onClick={handleGithubSignin}>
+              Se connecter avec GitHub
+            </Button>
+            <Button onClick={handleGoogleSignin}>
+              Se connecter avec Google
+            </Button>
           </CardContent>
         </Card>
       </div>
