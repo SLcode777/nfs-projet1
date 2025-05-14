@@ -241,6 +241,12 @@ export default function SigninPage() {
             </Button>
           </CardContent>
         </Card>
+        <Button
+          variant={"destructive"}
+          onClick={() => router.push("/auth/reset-password")}
+        >
+          Mot de passe oublié
+        </Button>
       </div>
     </div>
   );
